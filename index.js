@@ -6,7 +6,9 @@ const http = require("http");
 const { ExpressPeerServer } = require('peer');
 const schedule = require('node-schedule');
 const controlRooms = require("./controllers/controlRooms"); 
-
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/index.html");
+});
 const twilioObj = {
     username : null,
     cred : null 
