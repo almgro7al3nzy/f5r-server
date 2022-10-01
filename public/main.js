@@ -270,7 +270,10 @@ $(function() {
       socket.emit('add user', username);
     }
   });
-
+    socket.broadcast
+      .to(`${roomName}`)
+      .emit("updateChat", JSON.stringify(chatData)); // يلزم تحليلها في كائن Kotlin في Kotlin
+  });
   socket.io.on('reconnect_error', () => {
     log('attempt to reconnect has failed');
   });
