@@ -7,7 +7,26 @@ const server = require('http').createServer(app);
 const http = require('http').createServer(app);
 const io = require('socket.io')(server);
 const port = process.env.PORT || 3000;
-
+const basketball = io.of("/1");
+const basketball = io.of("/2");
+const basketball = io.of("/3");
+const basketball = io.of("/4");
+const basketball = io.of("/5");
+const basketball = io.of("/6");
+const basketball = io.of("/7");
+const basketball = io.of("/8");
+const basketball = io.of("/9");
+const basketball = io.of("/10");
+const basketball = io.of("/11");
+const basketball = io.of("/12");
+const basketball = io.of("/13");
+const basketball = io.of("/14");
+const basketball = io.of("/15");
+const basketball = io.of("/16");
+const basketball = io.of("/18");
+const basketball = io.of("/19");
+const basketball = io.of("/20");
+const basketball = io.of("/21");
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
 });
@@ -145,149 +164,4 @@ io.on('connection', (socket) => {
       });
     }
   });
-});
-
-
-
-const general = io.of("/general");
-const football = io.of("/football");
-const basketball = io.of("/basketball");
-const bls = io.of("/bls");
-const una = io.of("/una");
-var people = {};
-
-var generalTotalUser = 0;
-var footballTotalUser = 0;
-var basketballTotalUser = 0;
-var bls = 0;
-var una = 0;
-
-general.on('connection', function (socket) {
-
-    nickname = socket.handshake.query['nickname'];
-    people[socket.id] = nickname;
-
-    socket.on('join', function(msg){
-        footballTotalUser =  1;
-        console.log(nickname);
-        console.log("channel user count:");
-        socket.broadcast.emit('join');
-        socket.emit('activeUser');
-    });
-
-    socket.on('disconnect', function(msg){
-        generalTotalUser = generalTotalUser - 1;
-        console.log( people[socket.id] + ": has left to general channel");
-        console.log("channel user count:" + generalTotalUser);
-        socket.broadcast.emit('left', {nickname:  people[socket.id], count: generalTotalUser});
-    });
-
-    socket.on('new_message', function(msg){
-        console.log(msg.nickname + " has send message: " + msg.message);
-        socket.broadcast.emit('new_message', {nickname: msg.nickname, message: msg.message});
-    });
-});
-
-football.on('connection', function (socket) {
-
-    nickname = socket.handshake.query['nickname'];
-    people[socket.id] = nickname;
-
-    socket.on('join', function(msg){
-        footballTotalUser = footballTotalUser + 1;
-        console.log(nickname + ": has joined to general channel");
-        console.log("channel user count:" + footballTotalUser);
-        socket.broadcast.emit('join', {nickname: nickname, count: footballTotalUser});
-        socket.emit('activeUser', {count: footballTotalUser});
-    });
-
-    socket.on('disconnect', function(msg){
-        footballTotalUser = footballTotalUser - 1;
-        console.log( people[socket.id] + ": has left to general channel");
-        console.log("channel user count:" + footballTotalUser);
-        socket.broadcast.emit('left', {nickname:  people[socket.id], count: footballTotalUser});
-    });
-
-    socket.on('new_message', function(msg){
-        console.log(msg.nickname + " has send message: " + msg.message);
-        socket.broadcast.emit('new_message', {nickname: msg.nickname, message: msg.message});
-    });
-});
-
-basketball.on('connection', function (socket) {
-
-    nickname = socket.handshake.query['nickname'];
-    people[socket.id] = nickname;
-
-    socket.on('join', function(msg){
-        basketballTotalUser = basketballTotalUser + 1;
-        console.log(nickname + ": has joined to general channel");
-        console.log("channel user count:" + basketballTotalUser);
-        socket.broadcast.emit('join', {nickname: nickname, count: basketballTotalUser});
-        socket.emit('activeUser', {count: basketballTotalUser});
-    });
-
-    socket.on('disconnect', function(msg){
-        basketballTotalUser = basketballTotalUser - 1;
-        console.log( people[socket.id] + ": has left to general channel");
-        console.log("channel user count:" + basketballTotalUser);
-        socket.broadcast.emit('left', {nickname:  people[socket.id], count: basketballTotalUser});
-    });
-
-    socket.on('new_message', function(msg){
-        console.log(msg.nickname + " has send message: " + msg.message);
-        socket.broadcast.emit('new_message', {nickname: msg.nickname, message: msg.message});
-    });
-});
-
-bls.on('connection', function (socket) {
-
-    nickname = socket.handshake.query['nickname'];
-    people[socket.id] = nickname;
-
-    socket.on('join', function(msg){
-        basketballTotalUser = basketballTotalUser + 1;
-        console.log(nickname + ": has joined to general channel");
-        console.log("channel user count:" + basketballTotalUser);
-        socket.broadcast.emit('join', {nickname: nickname, count: basketballTotalUser});
-        socket.emit('activeUser', {count: basketballTotalUser});
-    });
-
-    socket.on('disconnect', function(msg){
-        basketballTotalUser = basketballTotalUser - 1;
-        console.log( people[socket.id] + ": has left to general channel");
-        console.log("channel user count:" + basketballTotalUser);
-        socket.broadcast.emit('left', {nickname:  people[socket.id], count: basketballTotalUser});
-    });
-
-    socket.on('new_message', function(msg){
-        console.log(msg.nickname + " has send message: " + msg.message);
-        socket.broadcast.emit('new_message', {nickname: msg.nickname, message: msg.message});
-    });
-});
-
-una.on('connection', function (socket) {
-
-    nickname = socket.handshake.query['nickname'];
-    people[socket.id] = nickname;
-
-    socket.on('join', function(msg){
-        basketballTotalUser = basketballTotalUser + 1;
-        console.log(nickname + ": has joined to general channel");
-        console.log("channel user count:" + basketballTotalUser);
-        socket.broadcast.emit('join', {nickname: nickname, count: basketballTotalUser});
-        socket.emit('activeUser', {count: basketballTotalUser});
-    });
-
-    socket.on('disconnect', function(msg){
-        basketballTotalUser = basketballTotalUser - 1;
-        console.log( people[socket.id] + ": has left to general channel");
-        console.log("channel user count:" + basketballTotalUser);
-        socket.broadcast.emit('left', {nickname:  people[socket.id], count: basketballTotalUser});
-    });
-
-    socket.on('new_message', function(msg){
-        console.log(msg.nickname + " has send message: " + msg.message);
-        socket.broadcast.emit('new_message', {nickname: msg.nickname, message: msg.message});
-    });
 });
