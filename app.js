@@ -10,7 +10,7 @@ const config = require('dotenv')
 var admin = require("firebase-admin");
 
 config.config()
-
+ 
 const mongodbClient = new MongoClient("mongodb://aissamelboudi:aissamelboudi@ac-a0hfmdm-shard-00-00.f34o72o.mongodb.net:27017,ac-a0hfmdm-shard-00-01.f34o72o.mongodb.net:27017,ac-a0hfmdm-shard-00-02.f34o72o.mongodb.net:27017/?ssl=true&replicaSet=atlas-vwd9ov-shard-0&authSource=admin&retryWrites=true&w=majority")
 
 app.use(express.json())
