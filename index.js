@@ -16,7 +16,9 @@ server.listen(port, () => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 // غرفة الدردشة
-const abbas ="/1"
+
+let abbas = io.of("/1");
+
 let numUsers = 0;
 
 io.on('connection', (socket) => {
