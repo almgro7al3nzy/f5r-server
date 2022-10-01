@@ -1,19 +1,16 @@
 {
-  "name": "dmdassc_chat_server",
-  "version": "0.0.1",
-  "description": "DMDASSC Chat Server",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "name": "socket.io-chat",
+  "version": "0.0.0",
+  "description": "A simple chat client using socket.io",
+  "main": "index.js",
+  "author": "Grant Timmerman",
+  "private": true,
+  "license": "BSD",
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "cookie-parser": "^1.4.5",
-    "express": "^4.17.1",
-    "socket.io": "^2.3.0"
+    "express": "~4.17.1",
+    "socket.io": "^4.0.0"
   },
-  "engines": {
-    "node": "12.x"
-  },
-  "license": "MIT"
+  "scripts": {
+    "start": "node index.js"
+  }
 }
