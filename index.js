@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // غرفة الدردشة
 
-let abbas = io.of("/1","/2");
+let abbas = io.of("/1",("/2");
 
 let numUsers = 0;
 
