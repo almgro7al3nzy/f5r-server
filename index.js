@@ -11,7 +11,14 @@ const port = process.env.PORT || 3000;
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
 });
+const general = io.of("/1");
+const football = io.of("/2");
+const basketball = io.of("/3");
+var people = {};
 
+var generalTotalUser = 0;
+var footballTotalUser = 0;
+var basketballTotalUser = 0;
 // التوجيه
 app.use(express.static(path.join(__dirname, 'public')));
 
