@@ -149,14 +149,16 @@ io.on('connection', (socket) => {
 
 
 
-const general = io.of("/general");
-const football = io.of("/football");
-const basketball = io.of("/basketball");
+const general = io.of("/1");
+const football = io.of("/2");
+const basketball = io.of("/3");
+const bls = io.of("/4");
 var people = {};
 
 var generalTotalUser = 0;
 var footballTotalUser = 0;
 var basketballTotalUser = 0;
+var bls = 0;
 
 general.on('connection', function (socket) {
 
@@ -235,24 +237,29 @@ basketball.on('connection', function (socket) {
         socket.broadcast.emit('new_message', {nickname: msg.nickname, message: msg.message});
     });
 });
-const basketball = io.of("/1");
-const basketball = io.of("/2");
-const basketball = io.of("/3");
-const basketball = io.of("/4");
-const basketball = io.of("/5");
-const basketball = io.of("/6");
-const basketball = io.of("/7");
-const basketball = io.of("/8");
-const basketball = io.of("/9");
-const basketball = io.of("/10");
-const basketball = io.of("/11");
-const basketball = io.of("/12");
-const basketball = io.of("/13");
-const basketball = io.of("/14");
-const basketball = io.of("/15");
-const basketball = io.of("/16");
-const basketball = io.of("/17");
-const room-id = io.of("/18");
-const basketball = io.of("/19");
-const basketball = io.of("/20");
-const basketball = io.of("/21");
+
+bls.on('connection', function (socket) {
+
+    nickname = socket.handshake.query['nickname'];
+    people[socket.id] = nickname;
+
+    socket.on('join', function(msg){
+        basketballTotalUser = basketballTotalUser + 1;
+        console.log(nickname + ": has joined to general channel");
+        console.log("channel user count:" + basketballTotalUser);
+        socket.broadcast.emit('join', {nickname: nickname, count: basketballTotalUser});
+        socket.emit('activeUser', {count: basketballTotalUser});
+    });
+
+    socket.on('disconnect', function(msg){
+        basketballTotalUser = basketballTotalUser - 1;
+        console.log( people[socket.id] + ": has left to general channel");
+        console.log("channel user count:" + basketballTotalUser);
+        socket.broadcast.emit('left', {nickname:  people[socket.id], count: basketballTotalUser});
+    });
+
+    socket.on('new_message', function(msg){
+        console.log(msg.nickname + " has send message: " + msg.message);
+        socket.broadcast.emit('new_message', {nickname: msg.nickname, message: msg.message});
+    });
+});
