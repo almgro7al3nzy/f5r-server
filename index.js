@@ -125,11 +125,6 @@ io.on('connection', (socket) => {
       username: socket.username
     });
   });
-      socket.broadcast
-      .to(`${roomName}`)
-      .emit("updateChat", JSON.stringify(chatData)); // يلزم تحليلها في كائن Kotlin في Kotlin
-  });
-  });
 
   // عندما يرسل العميل عبارة "توقف عن الكتابة" ، نقوم ببثها للآخرين
   socket.on('stop typing', () => {
