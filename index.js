@@ -1,115 +1,74 @@
-require('dotenv').config()
 
-const express = require("express");   
-const socketio = require("socket.io"); 
-const http = require("http");
-const { ExpressPeerServer } = require('peer');
-const schedule = require('node-schedule');
-const controlRooms = require("./controllers/controlRooms"); 
+const path = require('path');
+const http = require('http');
+const express = require('express');
+const socketio = require('socket.io');
+const formatMessage = require('./helpers/formatDate')
+const {
+  getActiveUser,
+  exitRoom,
+  newUser,
+  getIndividualRoomUsers
+} = require('./helpers/userHelper');
 
-const twilioObj = {
-    username : null,
-    cred : null 
-}
-
-// Voice chat uses turn server, not required locally 
-if(process.env.USE_TWILIO==="yes") { 
-    const client = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-    client.tokens.create().then(token => {
-        twilioObj.username = token.username;
-        twilioObj.cred = token.password; 
-    });
-
-    //every 12 hours 
-    schedule.scheduleJob("*/12 * * *",()=>{
-        console.log("CRON running"); 
-        const client = require('twilio')(process.env.accountSid, process.env.authToken);
-        client.tokens.create().then(token => {
-            twilioObj.username = token.username;
-            twilioObj.cred = token.password; 
-        });
-        controlRooms.deQRoom();
-    })
-}
-
-const cors = require('cors');
-const app = express(); 
-
-const router = require("./controllers/chatController");
+const app = express();
 const server = http.createServer(app);
-const io = socketio(server); 
+const io = socketio(server);
 
-app.use(cors());
-app.use(router); 
+//تعيين الدليل العام
+app.use(express.static(path.join(__dirname, 'public')));
 
-const roomRouter = require("./routes/room");
-app.use("/",roomRouter);
+// سيتم تشغيل هذه الكتلة عند اتصال العميل
+io.on('connection', socket => {
+  socket.on('joinRoom', ({ username, room }) => {
+    const user = newUser(socket.id, username, room);
 
-const peerServer = ExpressPeerServer(server, {
-    debug: true,
-    path: '/'
-});
-app.use('/peerjs', peerServer);
+    socket.join(user.room);
 
-const { 
-    addUser,removeUser,getUser,getUsersInRoom,
-    getUsersInVoice, addUserInVoice, removeUserInVoice 
-} = require("./controllers/userController"); 
+    // عام أهلا وسهلا
+    socket.emit('message', formatMessage("WebCage", 'Messages are limited to this room! '));
 
-io.on('connection', socket => { 
+    // بث في كل مرة يتصل فيها المستخدمون
+    socket.broadcast
+      .to(user.room)
+      .emit(
+        'message',
+        formatMessage("WebCage", `${user.username} has joined the room`)
+      );
 
-    socket.on('join',({name,room},callBack)=>{ 
-
-        const user = addUser({id:socket.id,name,room});  //destructuring the object 
-        if(user.error) return callBack(user.error); 
-        socket.join(user.room) //joins a user in a room 
-        socket.emit('message',{user:'admin', text:`Welcome ${user.name} in room ${user.room}.`}); //send to user
-        socket.emit('usersinvoice-before-join',{users:getUsersInVoice(user.room)});
-        socket.broadcast.to(user.room).emit('message',{user:'admin', text:`${user.name} has joined the room`}); //sends message to all users in room except this user
-        io.to(user.room).emit('users-online', { room: user.room, users: getUsersInRoom(user.room) });
-        //console.log(getUsersInRoom(user.room)); 
-        callBack(twilioObj); // passing no errors to frontend for now 
-        //callBack(); 
-    }); 
-
-    
-    socket.on('user-message',(message,callBack)=>{ //receive an message with eventName user-message 
-        const user = getUser(socket.id); 
-        io.to(user.room).emit('message',{user:user.name, text:message }); //send this message to the room 
-        
-        callBack(); 
-    }); 
-
-    socket.on('join-voice',({name,room},callBack)=>{
-        io.to(room).emit('add-in-voice',{id:socket.id,name:name}); 
-        addUserInVoice({id:socket.id,name,room}); 
-        callBack(); 
-    }); 
-    socket.on('leave-voice',({name,room},callBack)=>{
-
-        io.to(room).emit('remove-from-voice',{id:socket.id,name:name}); 
-        removeUserInVoice(socket.id); 
-        callBack(); 
-    }); 
-
-    socket.on('disconnect', () => {
-       
-        const user = removeUser(socket.id);
-        if(user) { 
-            io.to(user.room).emit('message',{user:'admin', text:`${user.name} left the chat` }); //send this message to the room 
-            io.to(user.room).emit('users-online', { room: user.room, users: getUsersInRoom(user.room) });
-            removeUserInVoice(user.id); 
-            socket.broadcast.to(user.room).emit('remove-from-voice',{id:socket.id,name:user.name}); 
-        }
+    //المستخدمون النشطون الحاليون واسم الغرفة
+    io.to(user.room).emit('roomUsers', {
+      room: user.room,
+      users: getIndividualRoomUsers(user.room)
     });
-    
+  });
 
+  //استمع إلى رسالة العميل
+  socket.on('chatMessage', msg => {
+    const user = getActiveUser(socket.id);
+
+    io.to(user.room).emit('message', formatMessage(user.username, msg));
+  });
+
+  //يعمل عند قطع اتصال العميل
+  socket.on('disconnect', () => {
+    const user = exitRoom(socket.id);
+
+    if (user) {
+      io.to(user.room).emit(
+        'message',
+        formatMessage("WebCage", `${user.username} has left the room`)
+      );
+
+      // المستخدمون النشطون الحاليون واسم الغرفة
+      io.to(user.room).emit('roomUsers', {
+        room: user.room,
+        users: getIndividualRoomUsers(user.room)
+      });
+    }
+  });
 });
 
+const PORT = process.env.PORT || 3000;
 
-
-
-const PORT = process.env.PORT || 5000; 
-server.listen(PORT, ()=>{
-    console.log(`Server started on port ${PORT}`); 
-});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
