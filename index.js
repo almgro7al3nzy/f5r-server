@@ -12,99 +12,100 @@ server.listen(port, () => {
   console.log('Server listening at port %d', port);
 });
 
-// التوجيه
-app.use(express.static(path.join(__dirname, 'public')));
+const app = express();
+app.use(cors());
+// parse application / x-www-form-urlencoded
+// {extended: true}: دعم الكائن المتداخل
+// يُرجع البرامج الوسيطة التي تقوم فقط بتحليل النصوص المشفرة بعنوان url و
+// سيحتوي هذا الكائن على أزواج مفتاح - قيمة ، حيث يمكن أن تكون القيمة a
+// سلسلة أو مصفوفة (عندما يكون التمديد خطأ) ، أو أي نوع (عندما يكون التمديد صحيحًا)
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// غرفة الدردشة
+// هذه البرامج الوسيطة المرتجعة التي تحلل json فقط وتنظر فقط في الطلبات التي يكون فيها نوع المحتوى
+// header يطابق خيار النوع.
+// عند استخدام req.body -> هذا باستخدام أداة تحليل الجسم لأنه سيتم تحليله
+// جسم الطلب للشكل الذي نريده
+app.use(bodyParser.json());
 
-let numUsers = 0;
+const PORT = 3000;
+const server = http.createServer(app);
 
-io.on('connection', (socket) => {
-	var addedUser = false;
-	console.log('connect');
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
-	// عندما يرسل العميل "رسالة جديدة" ، فإن هذا يستمع وينفذ
-	socket.on('new message', (data) => {
-		//نطلب من العميل تنفيذ "رسالة جديدة"
-		socket.broadcast.emit('new message', {
-			username: socket.username,
-			message: data
-		});
-	});
+io.on("connection", function (socket) {
+// في اللحظة التي يتصل فيها أحد عميلك بخادم socket.io ، سيحصل على معرف المقبس
+  // دعونا نطبع هذا.
+  console.log(`Connection : SocketId = ${socket.id}`);
+// نظرًا لأننا سنستخدم اسم المستخدم من خلال اتصال مقبس كامل ، فلنجعله عالميًا.
+  var userName = "";
 
-	// عندما يصدر العميل "إضافة مستخدم" ، فإن هذا يستمع وينفذ
-	socket.on('add user', (username) => {
-		if (addedUser) return;
+  socket.on("subscribe", function (data) {
+    console.log("subscribe trigged");
+    const room_data = JSON.parse(data);
+    userName = room_data.userName;
+    const roomName = room_data.roomName;
 
-		// نقوم بتخزين اسم المستخدم في جلسة المقبس لهذا العميل
-		socket.username = username;
-		++numUsers;
-		addedUser = true;
-		socket.emit('login', {
-			numUsers: numUsers
-		});
-		// صدى عالميًا (جميع العملاء) قام الشخص بالاتصال به
-		socket.broadcast.emit('user joined', {
-			username: socket.username,
-			numUsers: numUsers
-		});
-	});
+    socket.join(`${roomName}`);
+    console.log(`Username : ${userName} joined Room Name : ${roomName}`);
+// دع المستخدم الآخر يتلقى إشعارًا بأن المستخدم دخل الغرفة ؛
+    // يمكن استخدامه للإشارة إلى أن الشخص قد قرأ الرسائل. (مثل تحويل "غير المقروء" إلى "قراءة")
 
-	// عندما يرسل العميل "كتابة" ، نقوم ببثها للآخرين
-	socket.on('typing', () => {
-		socket.broadcast.emit('typing', {
-			username: socket.username
-		});
-	});
-
-	// عندما يرسل العميل عبارة "توقف عن الكتابة" ، نقوم ببثها للآخرين
-	socket.on('stop typing', () => {
-		socket.broadcast.emit('stop typing', {
-			username: socket.username
-		});
-	});
-
-	//عندما يقطع المستخدم .. تنفيذ هذا
-	socket.on('disconnect', () => {
-		if (addedUser) {
-			--numUsers;
-
-			// صدى عالميًا أن هذا العميل قد غادر
-			socket.broadcast.emit('user left', {
-				username: socket.username,
-				numUsers: numUsers
-			});
-		}
-	});
-
-	socket.on('fromClient', () => {
-		socket.broadcast.emit('fromClient', {
-			username: socket.username
-		});
-		console.log('from client');
-
-	});
-
-	socket.on('clientMessage', () => {
-		socket.broadcast.emit('clientMessage',{
-		});
-		console.log('connect');
-	});
-
-
-  // عندما يرسل العميل "رسالة جديدة" ، فإن هذا يستمع وينفذ
-  socket.on('new message', (data) => {
-    // نطلب من العميل تنفيذ "رسالة جديدة"
-    socket.broadcast.emit('new message', {
-      username: socket.username,
-      message: data
-    });
+// TODO: تحتاج إلى الاختيار
+    //io.to : User who has joined can get a event;
+    //socket.broadcast.to : all the users except the user who has joined will get the message
+    // socket.broadcast.to(`${roomName}`).emit('newUserToChatRoom',userName);
+    io.to(`${roomName}`).emit("newUserToChatRoom", userName);
   });
 
-  // عندما يصدر العميل "إضافة مستخدم" ، فإن هذا يستمع وينفذ
-  socket.on('add user', (username) => {
-    if (addedUser) return;
+  socket.on("unsubscribe", function (data) {
+    console.log("unsubscribe trigged");
+    const room_data = JSON.parse(data);
+    const userName = room_data.userName;
+    const roomName = room_data.roomName;
 
+    console.log(`Username : ${userName} leaved Room Name : ${roomName}`);
+    socket.broadcast.to(`${roomName}`).emit("userLeftChatRoom", userName);
+    socket.leave(`${roomName}`);
+  });
+
+  socket.on("newMessage", function (data) {
+    console.log("newMessage triggered");
+
+    const messageData = JSON.parse(data);
+    const messageContent = messageData.messageContent;
+    const roomName = messageData.roomName;
+
+    console.log(`[Room Number ${roomName}] ${userName} : ${messageContent}`);
+    //فقط قم بتمرير البيانات التي تم تمريرها من مأخذ توصيل الكاتب
+    const chatData = {
+      userName: userName,
+      messageContent: messageContent,
+      roomName: roomName,
+    };
+    socket.broadcast
+      .to(`${roomName}`)
+      .emit("updateChat", JSON.stringify(chatData)); // يلزم تحليلها في كائن Kotlin في Kotlin
+  });
+
+  // socket.on('typing',function(roomNumber){ //Only roomNumber is needed here
+  //     console.log('typing triggered')
+  //     socket.broadcast.to(`${roomNumber}`).emit('typing')
+  // })
+
+  // socket.on('stopTyping',function(roomNumber){ //Only roomNumber is needed here
+  //     console.log('stopTyping triggered')
+  //     socket.broadcast.to(`${roomNumber}`).emit('stopTyping')
+  // })
+
+  socket.on("disconnect", function () {
+    console.log("One of sockets disconnected from our server.");
+  });
+});
     // نقوم بتخزين اسم المستخدم في جلسة المقبس لهذا العميل
     socket.username = username;
     ++numUsers;
