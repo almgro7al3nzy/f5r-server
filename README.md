@@ -1,46 +1,118 @@
-# Getting Started with Create React App
+[![Build Status](https://travis-ci.org/peers/peerjs-server.png?branch=master)](https://travis-ci.org/peers/peerjs-server)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# PeerServer: A server for PeerJS #
 
-## Available Scripts
+PeerServer helps broker connections between PeerJS clients. Data is not proxied through the server. Showing list of Online Users.
 
-In the project directory, you can run:
+##[http://peerjs.com](http://peerjs.com)
 
-### `npm start`
+**If you prefer to use a cloud hosted PeerServer instead of running your own, [sign up for a free API key here](http://peerjs.com/peerserver)**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+or
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://www.heroku.com/deploy/?template=https://github.com/valarpirai/peerjs-server)
 
-### `npm test`
+### Run PeerServer
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Install the library:
 
-### `npm run build`
+```bash
+$> npm install peer
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Run the server:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+$> peerjs --port 9000 --key peerjs
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Or, create a custom server:
 
-### `npm run eject`
+```javascript
+var PeerServer = require('peer').PeerServer;
+var server = PeerServer({port: 9000, path: '/myapp'});
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+Connecting to the server from PeerJS:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```html
+<script>
+    // No API key required when not using cloud server
+    var peer = new Peer('someid', {host: 'localhost', port: 9000, path: '/myapp'});
+</script>
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Using HTTPS: Simply pass in PEM-encoded certificate and key.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```javascript
+var fs = require('fs');
+var PeerServer = require('peer').PeerServer;
 
-## Learn More
+var server = PeerServer({
+  port: 9000,
+  ssl: {
+    key: fs.readFileSync('/path/to/your/ssl/key/here.key'),
+    cert: fs.readFileSync('/path/to/your/ssl/certificate/here.crt')
+  }
+});
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### Running PeerServer behind a reverse proxy
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Make sure to set the `proxied` option, otherwise IP based limiting will fail.
+The option is passed verbatim to the
+[expressjs `trust proxy` setting](http://expressjs.com/4x/api.html#app-settings)
+if it is truthy.
+
+```javascript
+var PeerServer = require('peer').PeerServer;
+var server = PeerServer({port: 9000, path: '/myapp', proxied: true});
+```
+
+### Combining with existing express app
+
+```javascript
+var express = require('express');
+var app = express();
+var ExpressPeerServer = require('peer').ExpressPeerServer;
+
+app.get('/', function(req, res, next) { res.send('Hello world!'); });
+
+var server = app.listen(9000);
+
+var options = {
+    debug: true
+}
+
+app.use('/api', ExpressPeerServer(server, options));
+
+// OR
+
+var server = require('http').createServer(app);
+
+app.use('/peerjs', ExpressPeerServer(server, options));
+
+server.listen(9000);
+```
+
+### Events
+
+The `'connection'` event is emitted when a peer connects to the server.
+
+```javascript
+server.on('connection', function(id) { ... });
+```
+
+The `'disconnect'` event is emitted when a peer disconnects from the server or
+when the peer can no longer be reached.
+
+```javascript
+server.on('disconnect', function(id) { ... });
+```
+
+## Problems?
+
+Discuss PeerJS on our Google Group:
+https://groups.google.com/forum/?fromgroups#!forum/peerjs
+
+Please post any bugs as a Github issue.
