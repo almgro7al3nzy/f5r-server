@@ -1,5 +1,5 @@
 {
-  "name": "PeerJS Server",
-  "description": "A server side element to broker connections between PeerJS clients.",
-  "website": "http://peerjs.com/"
+  "name": "Dev F5R Server",
+  "description": "عنصر من جانب الخادم للتوسط في الاتصالات بين عملاء",
+  "website": "http://devf5r.com/"
 }
