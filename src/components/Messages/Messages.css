@@ -1,0 +1,13 @@
+.messages {
+    padding: 5% 0;
+    overflow: auto;
+    flex: auto;
+    background-color: #FFFFFF;
+    border-right: solid;
+    border-right-color: #d8d8d8;
+    border-right-width: 2px;
+    border-left: solid;
+    border-left-color: #d8d8d8;
+    border-left-width: 2px;
+
+}

@@ -1,0 +1,6 @@
+node_modules/
+CHANGELOG.md
+backend-web/venv/
+backend-voice/node_modules/
+*.DS_Store
+*.pyc
