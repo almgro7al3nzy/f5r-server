@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
+
+body {
+  margin: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-color);
+  font-weight: 300;
+  font-family: 'Titillium Web', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+  --bg: #202020;
+  --bg-dark: #181818;
+  --bg-darker: #111111;
+  --bg-light: #e6e6e6;
+  --bg-accent: #3c9dca;
+  --bg-accent-dark: #3c9dca1a;
+  --warning: #a73723;
+
+  --bg-gradient-border-vert: linear-gradient(0deg, var(--bg-dark) 0%, rgba(60, 157, 202, 0.582) 100%);
+  --bg-gradient-border: linear-gradient(90deg, var(--bg-dark) 0%, var(--bg-accent) 50%, var(--bg-dark) 100%);
+  --bg-gradient-border-faint: linear-gradient(90deg, rgba(24,24,24,1) 0%, rgba(60, 157, 202, 0.233) 50%, rgba(24,24,24,1) 100%);
+
+  --bg-button: #242526;
+  --text-color: #ffffff;
+  --warning-color: rgb(201, 21, 21);
+  --nav-size: 80px;
+  --border: 1px solid var(--bg-accent);
+  --border-radius: 7.5px;
+  --speed: 250ms;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  font-weight: lighter;
+}
+
+h2[class=heading] {
+  color: var(--bg-accent);
+}
+
+h3[class=subheading] {
+  color: var(--bg-accent);
+}
+
+h5[class=subcomment] {
+  color: grey;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+hr {
+  border: none;
+  margin: 2ex 0ex 2ex 0ex;
+  border-top: 0.1px solid rgba(255, 255, 255, 0.062);
+}
+
+button {
+  border: none;
+  color: black;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 1ex 3ex 1ex 3ex;
+  background-color: white;
+  border-radius: var(--border-radius);
+  font-family: 'Titillium Web', sans-serif;
+}
+
+button:hover {
+  background-color: rgb(216, 216, 216);
+}
+
+input {
+  border: none;
+  outline: none;
+  color: white;
+  font-weight: 600;
+  padding: 1ex 3ex 1ex 3ex;
+  background-color: var(--bg-darker);
+  border-radius: var(--border-radius);
+  font-family: 'Titillium Web', sans-serif;
+}
+
+input::-webkit-file-upload-button {
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: -2ex;
+  margin-right: 2ex;
+  padding: 0.5ex 3ex 0.5ex 3ex;
+  background-color: white;
+  border-radius: var(--border-radius);
+  font-family: 'Titillium Web', sans-serif;
+}
+
+input::-webkit-file-upload-button:hover {
+  background-color: rgb(235, 235, 235);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
+    -webkit-transition-delay: 9999s;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+/* makes text unselectable */
+.unselectable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.error {
+  color: var(--warning-color);
+  align-self: center;
+}
