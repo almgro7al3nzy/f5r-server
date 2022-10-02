@@ -1,2 +1,5 @@
-# lite_chat_for_heroku
-lite_chat_from_heroku
+# RTCApplication
+
+[Project not mantained]
+
+Voip application that let you create guilds and channels to chat with your friends
