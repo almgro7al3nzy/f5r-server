@@ -1,8 +1,0 @@
-.container {
-  align-self: flex-start;
-  margin-right: auto;
-}
-
-.container > a > img {
-  width: 10ex;
-}
