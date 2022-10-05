@@ -4,46 +4,51 @@ const express = require("express");
 const socketio = require("socket.io"); 
 const http = require("http");
 const { ExpressPeerServer } = require('peer');
-const schedule = require('node-schedule');
-const controlRooms = require("./controllers/controlRooms"); 
+
 
 const twilioObj = {
     username : null,
     cred : null 
 }
 
-// Voice chat uses turn server, not required locally 
-if(process.env.USE_TWILIO==="yes") { 
-    const client = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+// Comment if not required => below code is used to change creadentials for TURN server 
+//======================================================================================
+const client = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+client.tokens.create().then(token => {
+    twilioObj.username = token.username;
+    twilioObj.cred = token.password;
+});
+const schedule = require('node-schedule');
+let rule = new schedule.RecurrenceRule();
+rule.hour = 12;
+schedule.scheduleJob(rule,()=>{
+    console.log("running"); 
+    const client = require('twilio')(process.env.accountSid, process.env.authToken);
     client.tokens.create().then(token => {
         twilioObj.username = token.username;
         twilioObj.cred = token.password; 
     });
+})
+//========================================================================
+const fs = require('fs');
 
-    //every 12 hours 
-    schedule.scheduleJob("*/12 * * *",()=>{
-        console.log("CRON running"); 
-        const client = require('twilio')(process.env.accountSid, process.env.authToken);
-        client.tokens.create().then(token => {
-            twilioObj.username = token.username;
-            twilioObj.cred = token.password; 
-        });
-        controlRooms.deQRoom();
-    })
-}
+const SSL_CONFIG = {
+  cert: fs.readFileSync('./cert.pem'),
+  key: fs.readFileSync('./key.pem'),
+};
+const https = require('https');
 
 const cors = require('cors');
 const app = express(); 
 
 const router = require("./controllers/chatController");
-const server = http.createServer(app);
+//const server = https.createServer(SSL_CONFIG,app);
+
+ const0 server = http.createServer(app);
 const io = socketio(server); 
 
 app.use(cors());
 app.use(router); 
-
-const roomRouter = require("./routes/room");
-app.use("/",roomRouter);
 
 const peerServer = ExpressPeerServer(server, {
     debug: true,
@@ -101,6 +106,7 @@ io.on('connection', socket => {
             removeUserInVoice(user.id); 
             socket.broadcast.to(user.room).emit('remove-from-voice',{id:socket.id,name:user.name}); 
         }
+        //console.log("User left"); 
     });
     
 
